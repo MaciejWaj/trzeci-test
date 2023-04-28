@@ -3,22 +3,21 @@ package pl.kurs.trzecitest.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import java.io.Serializable;
+import javax.persistence.EntityListeners;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
-public class Circle extends Figures implements Serializable {
+@EntityListeners(AuditingEntityListener.class)
+public class Circle extends Shape {
 
-    @Column(name = "radius")
     private double radius;
 
-    public Circle(String type, double radius) {
-        super(type);
+    public Circle(double radius) {
         this.radius = radius;
     }
 

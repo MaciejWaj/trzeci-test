@@ -1,28 +1,24 @@
 package pl.kurs.trzecitest.model;
 
-
-
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-
+import org.springframework.data.annotation.Version;
 import org.springframework.data.annotation.*;
 
-
-import org.springframework.data.annotation.Version;
-
-
-import javax.persistence.*;
 import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public class AuditableEntity {
+@NoArgsConstructor
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+public abstract class Shape {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Version
     private int version;
@@ -35,4 +31,7 @@ public class AuditableEntity {
     @LastModifiedBy
     private String lastModifiedBy;
 
+    public abstract double calculateArea();
+
+    public abstract double calculatePerimeter();
 }

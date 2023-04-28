@@ -9,9 +9,9 @@ import java.util.Map;
 @Getter
 @Setter
 @ToString
-public class CreateFiguresCommand {
+public class CreateShapeCommand {
 
     private String type;
-    private Map<String, Object> parameters;
+    private Map<String, String> parameters;
 
 }

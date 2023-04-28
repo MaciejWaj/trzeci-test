@@ -1,29 +1,25 @@
 package pl.kurs.trzecitest.model;
 
-import lombok.*;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.web.bind.annotation.GetMapping;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.*;
-import java.io.Serializable;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Rectangle extends Figures implements Serializable {
+@EntityListeners(AuditingEntityListener.class)
+public class Rectangle extends Shape {
 
-    @Column(name ="height")
     private double height;
-    @Column(name ="length")
     private double length;
 
-    public Rectangle(String type, double height, double length) {
-        super(type);
-        this.height = height;
-        this.length = length;
-    }
 
     @Override
     public double calculateArea() {
@@ -34,5 +30,4 @@ public class Rectangle extends Figures implements Serializable {
     public double calculatePerimeter() {
         return 2 * length + 2 * height;
     }
-
 }

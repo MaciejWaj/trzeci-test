@@ -1,26 +1,23 @@
 package pl.kurs.trzecitest.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.*;
-import java.io.Serializable;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
-public class Square extends Figures implements Serializable {
+@EntityListeners(AuditingEntityListener.class)
+public class Square extends Shape {
 
-    @Column(name ="width")
     private double width;
-
-    public Square(String type, double width) {
-        super(type);
-        this.width = width;
-    }
 
     @Override
     public double calculateArea() {
@@ -31,5 +28,4 @@ public class Square extends Figures implements Serializable {
     public double calculatePerimeter() {
         return 4 * width;
     }
-
 }

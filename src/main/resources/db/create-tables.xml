@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet id="20230329_001_maciej" author="maciej">
+
+        <createTable tableName="app_role">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="app_user">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="user_roles">
+            <column name="user_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="user_roles" baseColumnNames="user_id"
+                                 referencedTableName="app_user" referencedColumnNames="id"
+                                 constraintName="FK_USER_ROLES"/>
+        <addForeignKeyConstraint baseTableName="user_roles" baseColumnNames="role_id" constraintName="FK_ROLES_USER"
+                                 referencedTableName="app_role" referencedColumnNames="id"/>
+
+        <createTable tableName="shape">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="dtype" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="create_at" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_modified_at" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_modified_by" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="radius" type="DOUBLE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="height" type="DOUBLE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="length" type="DOUBLE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="width" type="DOUBLE">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+    </changeSet>
+</databaseChangeLog>

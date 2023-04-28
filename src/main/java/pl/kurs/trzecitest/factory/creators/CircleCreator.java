@@ -2,12 +2,12 @@ package pl.kurs.trzecitest.factory.creators;
 
 import org.springframework.stereotype.Service;
 import pl.kurs.trzecitest.model.Circle;
-import pl.kurs.trzecitest.model.Figures;
+import pl.kurs.trzecitest.model.Shape;
 
 import java.util.Map;
 
 @Service
-public class CircleCreator implements FiguresCreator {
+public class CircleCreator implements ShapeCreator {
 
     @Override
     public String getType() {
@@ -15,15 +15,11 @@ public class CircleCreator implements FiguresCreator {
     }
 
     @Override
-    public Figures create(Map<String, Object> parameters) {
+    public Shape create(Map<String, String> parameters) {
         Circle createCircle = new Circle(
-                getType(),
                 getDoubleParameter("radius", parameters)
         );
-        createCircle.setArea(createCircle.calculateArea());
-        createCircle.setPerimeter(createCircle.calculatePerimeter());
         return createCircle;
     }
-
 
 }

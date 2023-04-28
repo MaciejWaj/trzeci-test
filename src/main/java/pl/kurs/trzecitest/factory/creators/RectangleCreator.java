@@ -1,13 +1,13 @@
 package pl.kurs.trzecitest.factory.creators;
 
 import org.springframework.stereotype.Service;
-import pl.kurs.trzecitest.model.Figures;
 import pl.kurs.trzecitest.model.Rectangle;
+import pl.kurs.trzecitest.model.Shape;
 
 import java.util.Map;
 
 @Service
-public class RectangleCreator implements FiguresCreator {
+public class RectangleCreator implements ShapeCreator {
 
     @Override
     public String getType() {
@@ -15,14 +15,11 @@ public class RectangleCreator implements FiguresCreator {
     }
 
     @Override
-    public Figures create(Map<String, Object> parameters) {
+    public Shape create(Map<String, String> parameters) {
         Rectangle createdRectangle = new Rectangle(
-                getType(),
                 getDoubleParameter("height", parameters),
                 getDoubleParameter("length", parameters)
         );
-        createdRectangle.setArea(createdRectangle.calculateArea());
-        createdRectangle.setPerimeter(createdRectangle.calculatePerimeter());
         return createdRectangle;
     }
 
