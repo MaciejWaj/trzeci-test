@@ -33,6 +33,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/api/v1/shapes").hasAnyRole("CREATOR")
+//                .antMatchers("/api/v1/users/tutajMetoda").hasAnyRole("ADMIN")     dodać nazwe metody
                 .anyRequest().permitAll()
                 .and()
                 .httpBasic()

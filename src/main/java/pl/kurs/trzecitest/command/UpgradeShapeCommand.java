@@ -9,8 +9,8 @@ import java.util.Map;
 @Getter
 @Setter
 @ToString
-public class CreateShapeCommand {
+public class UpgradeShapeCommand {
 
-    private String type;
+    private int id;
     private Map<String, String> parameters;
 }

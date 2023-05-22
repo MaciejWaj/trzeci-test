@@ -11,4 +11,7 @@ public interface AppUserRepository extends JpaRepository<AppUser, Integer> {
     @Query("SELECT u FROM AppUser u LEFT JOIN FETCH u.roles WHERE u.username = ?1")
     Optional<AppUser> findByUsernameWithRoles(String username);
 
+    Optional<AppUser> findByUsername(String username);
+
+
 }

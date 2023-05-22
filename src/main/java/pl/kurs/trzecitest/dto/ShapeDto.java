@@ -1,6 +1,7 @@
 package pl.kurs.trzecitest.dto;
 
 import lombok.*;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.time.LocalDateTime;
 
@@ -8,7 +9,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class ShapeDto {
+public abstract class ShapeDto extends RepresentationModel<ShapeDto> {
 
         private int id;
         private String type;

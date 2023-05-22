@@ -76,6 +76,28 @@
                 <constraints nullable="true"/>
             </column>
         </createTable>
+    </changeSet>
 
+    <changeSet id="20230522_002_maciej" author="Maciej">
+        <addColumn tableName="app_user">
+            <column> name="created_account_at" type="TIMESTAMP">
+            <constraints nullable="true"/>
+            </column>
+            <column> name="last_login" type"TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+            <column name="shape_id" type="INT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        
+        <addColumn tableName="shape">
+            <column name="author_id" type="INT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="shape" baseColumnNames="author_id"
+                                 referencedTableName="app_user" referencedColumnNames="shape_id"
+                                 constraintName="FK_SHAPE_APP_USER"/>
     </changeSet>
 </databaseChangeLog>
