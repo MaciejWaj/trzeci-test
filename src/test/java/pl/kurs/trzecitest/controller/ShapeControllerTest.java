@@ -1,149 +1,188 @@
 package pl.kurs.trzecitest.controller;
 
-import org.junit.jupiter.api.BeforeEach;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import pl.kurs.trzecitest.TrzeciTestApplication;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import pl.kurs.trzecitest.command.CreateShapeCommand;
-import pl.kurs.trzecitest.exception.DuplicateShapeException;
-import pl.kurs.trzecitest.exception.ShapeNotBelongToUserException;
-import pl.kurs.trzecitest.exception.ShapeNotFoundException;
+import pl.kurs.trzecitest.command.UpgradeShapeCommand;
+import pl.kurs.trzecitest.dto.CircleDto;
+import pl.kurs.trzecitest.dto.SquareDto;
 import pl.kurs.trzecitest.model.Circle;
-import pl.kurs.trzecitest.model.Shape;
-import pl.kurs.trzecitest.model.Square;
 import pl.kurs.trzecitest.repository.ShapeRepository;
-import pl.kurs.trzecitest.service.ShapeService;
-import pl.kurs.trzecitest.shapefinder.ShapeSpecificationFinder;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(classes = TrzeciTestApplication.class)
+@SpringBootTest
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
+@Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = {"classpath:data.sql"})
 class ShapeControllerTest {
 
-    @Mock
+    @Autowired
     private ShapeRepository shapeRepository;
-    @Mock
-    private ShapeSpecificationFinder shapeSpecificationFinder;
-    @Mock
-    private ShapeService shapeService;
-    @InjectMocks
-    private ShapeController shapeController;
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private MockMvc mvc;
+
+    @AfterEach
+    public void cleanUp() {
+        shapeRepository.deleteAll();
     }
 
     @Test
-    public void shouldCreateShapeSquare() throws DuplicateShapeException {
+    @WithMockUser(username = "Maciej", roles = "CREATOR")
+    public void shouldCreateShapeSquare() throws Exception {
+        //given
         CreateShapeCommand command = new CreateShapeCommand();
-        Shape square = new Square();
         command.setType("SQUARE");
         command.setParameters(Collections.singletonMap("width", "10"));
 
-        when(shapeService.createShape(command)).thenReturn(square);
-        when(shapeRepository.saveAndFlush(square)).thenReturn(square);
+        //when
+        String contentAsString = mvc.perform(post("/api/v1/shapes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(command)))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-        Shape result = shapeService.createShape(command);
+        //then
+        SquareDto squareDto = objectMapper.readValue(contentAsString, SquareDto.class);
+        assertEquals(squareDto.getType(), "Square");
 
-        assertNotNull(result);
-        assertEquals(square, result);
+        assertEquals(1, shapeRepository.findAll().size());
     }
 
     @Test
-    public void shouldFindBySpecification() {
-        Map<String, String> param = new HashMap<>();
-        List<Shape> shapes = new ArrayList<>();
-
-        when(shapeSpecificationFinder.getShapeWithParams(param)).thenReturn(shapes);
-
-        List<Shape> result = shapeService.findBySpecification(param);
-
-        assertNotNull(result);
-        assertEquals(shapes, result);
-    }
-
-    @Test
-    public void addingDuplicateShapeShouldThrowException() throws DuplicateShapeException {
+    @WithMockUser(username = "Maciej", roles = "User")
+    public void shouldThrowUnauthorizedWhenCreateShapeWithoutRoleCreator() throws Exception {
+        //given
         CreateShapeCommand command = new CreateShapeCommand();
-        command.setType("Circle");
-        command.setParameters(Collections.singletonMap("radius", "10"));
-        shapeService.createShape(command);
+        command.setType("SQUARE");
+        command.setParameters(Collections.singletonMap("width", "10"));
 
-        when(shapeService.createShape(command)).thenThrow(DuplicateShapeException.class);
+        //when
+        String contentAsString = mvc.perform(post("/api/v1/shapes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(command)))
+                .andExpect(status().isForbidden())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
     }
 
     @Test
-    public void commandCantBeEmpty() throws NullPointerException, DuplicateShapeException {
+    @WithMockUser(username = "Maciej", roles = "CREATOR")
+    public void shouldFindBySpecification() throws Exception {
+        //given
+        Circle circle = new Circle(10);
+        shapeRepository.save(circle);
+
+        //when
+        String contentAsString = mvc.perform(get("/api/v1/shapes?radius=10&createdBy=Maciej")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        //then
+        List<CircleDto> circleDto = objectMapper.readValue(contentAsString, new TypeReference<>() {
+        });
+
+        assertEquals(1, circleDto.size());
+        assertEquals(10, circleDto.get(0).getRadius());
+
+    }
+
+    @Test
+    @WithMockUser(username = "Maciej", roles = "CREATOR")
+    public void commandCantBeEmpty() throws Exception {
+        //given
         CreateShapeCommand command = new CreateShapeCommand();
-        when(shapeService.createShape(command)).thenThrow(NullPointerException.class);
+
+        //when
+        ResultActions resultActions = mvc.perform(post("/api/v1/shapes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(command)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void deleteShapeByIdShouldReturnOk() throws ShapeNotBelongToUserException, ShapeNotFoundException {
-        int shapeId = 1;
-        String username = "testUser";
-        UserDetails currentUser = User.withUsername(username).password("password").roles("USER").build();
+    @WithMockUser(username = "Maciej", roles = "CREATOR")
+    public void addingDuplicateShapeShouldThrowException() throws Exception {
+        //given
+        Circle circle = new Circle(1);
+        CreateShapeCommand command = new CreateShapeCommand();
+        command.setType("CIRCLE");
+        command.setParameters(Collections.singletonMap("radius", "1"));
 
-        shapeService.deleteShapeByIdForCurrentUser(shapeId, currentUser.getUsername());
+        //when
+        shapeRepository.save(circle);
 
-        ResponseEntity responseEntity = shapeController.deleteShapeById(shapeId, currentUser);
-        Mockito.verify(shapeService, times(1)).deleteShapeByIdForCurrentUser(shapeId, username);
+        //then
+        ResultActions resultActions = mvc.perform(post("/api/v1/shapes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(command)))
+                .andExpect(status().isBadRequest());
 
-        assert responseEntity != null;
-        assert responseEntity.getStatusCode() == HttpStatus.OK;
+        assertEquals(1, shapeRepository.findAll().size());
     }
 
     @Test
-    public void deleteShapeByIdShouldThrowShapeNotBelongToUserException() throws ShapeNotBelongToUserException, ShapeNotFoundException {
-        int shapeId = 1;
-        String ownerUsername = "ownerUser";
-        String otherUsername = "otherUser";
+    @WithMockUser(username = "Maciej", roles = "CREATOR")
+    public void shouldDeleteShapeById() throws Exception {
+        //given
+        Circle circle = new Circle(10);
+        shapeRepository.save(circle);
 
-        UserDetails ownerUser = User.withUsername(ownerUsername).password("password").roles("USER").build();
-        UserDetails otherUser = User.withUsername(otherUsername).password("password").roles("USER").build();
+        //when
+        ResultActions resultActions = mvc.perform(delete("/api/v1/shapes/{id}", circle.getId()))
+                .andExpect(status().isNoContent());
 
-        Circle circle = new Circle();
-        circle.setId(shapeId);
-        circle.setCreatedBy(ownerUser.getUsername());
-
-        doThrow(ShapeNotBelongToUserException.class)
-                .when(shapeService)
-                .deleteShapeByIdForCurrentUser(shapeId, otherUsername);
-
-        assertThrows(ShapeNotBelongToUserException.class, () -> {
-            shapeService.deleteShapeByIdForCurrentUser(shapeId, otherUser.getUsername());
-        });
+        assertEquals(0, shapeRepository.findAll().size());
     }
 
     @Test
-    public void deleteShapeByIdShouldThrowShapeNotFoundException() throws ShapeNotBelongToUserException, ShapeNotFoundException {
-        int existingShapeId = 1;
-        int shapeIdToDelete = 2;
-        String username = "testUser";
-        UserDetails currentUser = User.withUsername(username).password("password").roles("USER").build();
+    @WithMockUser(username = "Maciej", roles = "CREATOR")
+    public void shouldEditCircleRadiusFrom1To10() throws Exception {
+        //given
+        Circle circle = new Circle(1);
+        shapeRepository.save(circle);
 
-        List<Shape> db = new ArrayList<>();
-        db.add(new Circle(existingShapeId));
+        UpgradeShapeCommand upgradeCommand = new UpgradeShapeCommand();
+        upgradeCommand.setId(circle.getId());
+        upgradeCommand.setParameters(Collections.singletonMap("radius", "10"));
 
-        doThrow(ShapeNotFoundException.class)
-                .when(shapeService)
-                .deleteShapeByIdForCurrentUser(shapeIdToDelete, username);
+        //when
+        String contentAsString = mvc.perform(put("/api/v1/shapes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(upgradeCommand)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-        assertThrows(ShapeNotFoundException.class, () -> {
-            shapeService.deleteShapeByIdForCurrentUser(shapeIdToDelete, currentUser.getUsername());
-        });
+        //then
+        CircleDto circleDto = objectMapper.readValue(contentAsString, CircleDto.class);
+        assertEquals(10.0, circleDto.getRadius());
     }
 }

@@ -4,32 +4,35 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
 
-    <changeSet id="20230425_002_maciej" author="maciej">
+    <changeSet id="20230618_002_maciej" author="maciej">
 
         <createView viewName="shape_with_area_and_perimeter">
-            SELECT
-                id,
-                dtype,
-                create_at,
-                created_by,
-                last_modified_at,
-                last_modified_by,
-                version,
-                radius,
-                height,
-                length,
-                width,
-                CASE
-                WHEN  dtype = 'Circle' THEN 2 * pi() * radius
-                WHEN  dtype = 'Rectangle' THEN 2 * length + 2 * height
-                WHEN  dtype = 'Square' THEN 4 * width
-                END AS perimeter,
-                CASE
-                WHEN dtype = 'Circle' THEN pi() * radius * 2
-                WHEN dtype = 'Rectangle' THEN length * height
-                WHEN dtype = 'Square' THEN width * width
-                END AS area
-            FROM all_shapes
+            SELECT s.id,
+            s.dtype,
+            s.create_at,
+            s.last_modified_at,
+            s.version,
+            s.radius,
+            s.height,
+            s.length,
+            s.width,
+            s.created_by_id,
+            s.modified_by_id,
+            u.username AS created_by,
+            us.username AS last_modified_by,
+            CASE
+            WHEN s.dtype = 'Circle' THEN 2 * pi() * s.radius
+            WHEN s.dtype = 'Rectangle' THEN 2 * s.length + 2 * s.width
+            WHEN s.dtype = 'Square' THEN 4 * s.width
+            END AS perimeter,
+            CASE
+            WHEN s.dtype = 'Circle' THEN pi() * s.radius * s.radius
+            WHEN s.dtype = 'Rectangle' THEN s.length * s.width
+            WHEN s.dtype = 'Square' THEN s.width * s.width
+            END AS area
+            FROM shape.shape s
+            JOIN app_user u ON s.created_by_id = u.id
+            JOIN app_user us ON s.modified_by_id = us.id;
         </createView>
 
     </changeSet>

@@ -11,9 +11,6 @@ import pl.kurs.trzecitest.command.CreateShapeCommand;
 import pl.kurs.trzecitest.command.UpgradeShapeCommand;
 import pl.kurs.trzecitest.convertertodto.ShapeDtoFactory;
 import pl.kurs.trzecitest.dto.ShapeDto;
-import pl.kurs.trzecitest.exception.DuplicateShapeException;
-import pl.kurs.trzecitest.exception.ShapeNotBelongToUserException;
-import pl.kurs.trzecitest.exception.ShapeNotFoundException;
 import pl.kurs.trzecitest.model.Shape;
 import pl.kurs.trzecitest.service.ShapeService;
 
@@ -31,7 +28,7 @@ public class ShapeController {
     private final ShapeDtoFactory shapeDtoFactory;
 
     @PostMapping
-    public ResponseEntity<ShapeDto> save(@RequestBody CreateShapeCommand command) throws DuplicateShapeException, NullPointerException {
+    public ResponseEntity<ShapeDto> save(@RequestBody CreateShapeCommand command) {
         return ResponseEntity.status(HttpStatus.CREATED).body(toDto(shapeService.createShape(command)));
     }
 
@@ -43,13 +40,13 @@ public class ShapeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteShapeById(@PathVariable int id, @AuthenticationPrincipal UserDetails currentUser) throws ShapeNotBelongToUserException, ShapeNotFoundException {
-        shapeService.deleteShapeByIdForCurrentUser(id, currentUser.getUsername());
-        return new ResponseEntity(HttpStatus.OK);
+    public ResponseEntity<String> deleteShapeById(@PathVariable int id, @AuthenticationPrincipal UserDetails currentUser) {
+        shapeService.deleteByIdAndUserName(id, currentUser.getUsername());
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PutMapping
-    public ResponseEntity<ShapeDto> editShape(@RequestBody UpgradeShapeCommand upgradeShapeCommand, @AuthenticationPrincipal UserDetails currentUser) throws ShapeNotBelongToUserException, ShapeNotFoundException, IllegalAccessException {
+    public ResponseEntity<ShapeDto> editShape(@RequestBody UpgradeShapeCommand upgradeShapeCommand, @AuthenticationPrincipal UserDetails currentUser) {
         return ResponseEntity.status(HttpStatus.OK).body(toDto(shapeService.editShape(upgradeShapeCommand, currentUser.getUsername())));
     }
 

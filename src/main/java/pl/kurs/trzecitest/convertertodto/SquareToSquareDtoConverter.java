@@ -5,10 +5,10 @@ import org.modelmapper.spi.MappingContext;
 import org.springframework.stereotype.Component;
 import pl.kurs.trzecitest.controller.UserController;
 import pl.kurs.trzecitest.dto.SquareDto;
-import pl.kurs.trzecitest.exception.UserNotFoundException;
 import pl.kurs.trzecitest.model.Square;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class SquareToSquareDtoConverter implements Converter<Square, SquareDto>, ShapeToShapeDtoConverter {
@@ -16,22 +16,20 @@ public class SquareToSquareDtoConverter implements Converter<Square, SquareDto>,
     @Override
     public SquareDto convert(MappingContext<Square, SquareDto> mappingContext) {
         Square source = mappingContext.getSource();
+
         SquareDto dto = new SquareDto(
                 source.getId(),
                 source.getClass().getSimpleName(),
                 source.getVersion(),
                 source.getWidth(),
-                source.getCreatedBy(),
+                source.getCreatedBy().getUsername(),
                 source.getCreateAt(),
                 source.getLastModifiedAt(),
-                source.getLastModifiedBy(),
+                source.getLastModifiedBy().getUsername(),
                 source.calculateArea(),
                 source.calculatePerimeter());
-        try {
-            dto.add(linkTo((methodOn(UserController.class).findUserByUsername(source.getCreatedBy()))).withRel("Author"));
-        } catch (UserNotFoundException e) {
-            e.printStackTrace();
-        }
+        dto.add(linkTo((methodOn(UserController.class).findUserByUsername(source.getCreatedBy().getUsername()))).withRel("Author"));
+
         return dto;
     }
 

@@ -1,16 +1,18 @@
 package pl.kurs.trzecitest.convertertodto;
 
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
 import org.springframework.stereotype.Component;
 import pl.kurs.trzecitest.controller.UserController;
 import pl.kurs.trzecitest.dto.RectangleDto;
-import pl.kurs.trzecitest.exception.UserNotFoundException;
 import pl.kurs.trzecitest.model.Rectangle;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
+@Slf4j
 public class RectangleToRectangleDtoConverter implements Converter<Rectangle, RectangleDto>, ShapeToShapeDtoConverter {
 
     @Override
@@ -22,17 +24,15 @@ public class RectangleToRectangleDtoConverter implements Converter<Rectangle, Re
                 source.getVersion(),
                 source.getHeight(),
                 source.getLength(),
-                source.getCreatedBy(),
+                source.getCreatedBy().getUsername(),
                 source.getCreateAt(),
                 source.getLastModifiedAt(),
-                source.getLastModifiedBy(),
+                source.getLastModifiedBy().getUsername(),
                 source.calculateArea(),
                 source.calculatePerimeter());
-        try {
-            dto.add(linkTo((methodOn(UserController.class).findUserByUsername(source.getCreatedBy()))).withRel("Author"));
-        } catch (UserNotFoundException e) {
-            e.printStackTrace();
-        }
+
+        dto.add(linkTo((methodOn(UserController.class).findUserByUsername(source.getCreatedBy().getUsername()))).withRel("Author"));
+
         return dto;
     }
 

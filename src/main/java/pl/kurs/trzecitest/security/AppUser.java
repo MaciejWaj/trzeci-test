@@ -1,8 +1,10 @@
 package pl.kurs.trzecitest.security;
 
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.springframework.data.annotation.CreatedDate;
@@ -11,27 +13,27 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import pl.kurs.trzecitest.model.Shape;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
-public class AppUser extends RepresentationModel<AppUser> implements UserDetails  {
+public class AppUser extends RepresentationModel<AppUser> implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
+    @Column(unique = true)
     private String username;
     private String password;
     @CreatedDate
     private LocalDateTime createdAccountAt;
     private LocalDateTime lastLogin;
-
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "createdBy", cascade = CascadeType.REMOVE)
     @Fetch(FetchMode.JOIN)
     private List<Shape> shape = new ArrayList<>();
 

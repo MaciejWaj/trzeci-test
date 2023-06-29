@@ -16,10 +16,22 @@ public class CircleCreator implements ShapeCreator {
 
     @Override
     public Shape create(Map<String, String> parameters) {
-        Circle createCircle = new Circle(
-                getDoubleParameter("radius", parameters)
-        );
-        return createCircle;
+        return new Circle(getDoubleParameter("radius", parameters));
     }
 
+    @Override
+    public Shape update(Shape shape, Map<String, String> parameters) {
+
+        if (shape instanceof Circle) {
+            for (Map.Entry<String, String> entry : parameters.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+
+                if (key.equals("radius")) {
+                    ((Circle) shape).setRadius(Double.parseDouble(value));
+                }
+            }
+        }
+        return shape;
+    }
 }

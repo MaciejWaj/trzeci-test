@@ -1,76 +1,77 @@
 package pl.kurs.trzecitest.shapefinder;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Query;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pl.kurs.trzecitest.model.Shape;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ShapeSpecificationFinder {
 
     private final EntityManagerFactory entityManagerFactory;
 
-    public List<Shape> getShapeWithParams(Map<String, String> parameter) {
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        List<Shape> shapes = new ArrayList<>();
+    public List<Shape> getShapeWithParams(Map<String, String> parameters) {
 
-        try {
-            String viewName = getViewName(parameter);
-            if (viewName != null) {
-                String queryStr = "SELECT * FROM " + viewName;
-                String condition = getCondition(parameter);
-                if (!condition.isEmpty()) {
-                    queryStr += " WHERE " + condition;
-                }
-                Query query = entityManager.createNativeQuery(queryStr, Shape.class);
-                shapes = query.getResultList();
-            }
-        } catch (NoResultException e) {
-            e.getMessage();
-        } finally {
-            entityManager.close();
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+
+        String viewName = getViewName(parameters);
+
+        String queryStr = "SELECT * FROM " + viewName;
+        String condition = getCondition(parameters);
+        if (!condition.isEmpty()) {
+            queryStr += " WHERE " + condition;
         }
-        return shapes;
+
+        Query query = entityManager.createNativeQuery(queryStr, Shape.class);
+
+        if (!parameters.isEmpty()) {
+            int parameterIndex = 1;
+            for (String value : parameters.values()) {
+                query.setParameter(parameterIndex, value);
+                parameterIndex++;
+            }
+        }
+        return query.getResultList();
     }
 
     private String getCondition(Map<String, String> parameters) {
         List<String> conditions = new ArrayList<>();
+
         for (Map.Entry<String, String> entry : parameters.entrySet()) {
             String key = entry.getKey();
-            String value = entry.getValue();
             String clearKey = key.replaceAll("[^a-zA-Z0-9\\s]", "");
+
             if (clearKey.endsWith("From")) {
                 String keyWithoutSuffix = clearKey.substring(0, clearKey.length() - 4);
-                conditions.add(keyWithoutSuffix + " >= " + value);
+                conditions.add(keyWithoutSuffix + " >= ?");
             } else if (clearKey.endsWith("To")) {
                 String keyWithoutSuffix = clearKey.substring(0, clearKey.length() - 2);
-                conditions.add(keyWithoutSuffix + " <= " + value);
+                conditions.add(keyWithoutSuffix + " <= ?");
             } else if (clearKey.contains("type")) {
-                conditions.add("d" + clearKey + " = " + "'" + value + "'");
+                conditions.add("d" + clearKey + " = ?");
             } else {
                 String queryKey = clearKey.replaceAll("([A-Z])", "_$1".toLowerCase());
-                conditions.add(queryKey + " = " + "'" + value + "'");
+                conditions.add(queryKey + " = ?");
             }
         }
         return String.join(" AND ", conditions);
     }
 
     private String getViewName(Map<String, String> params) {
-        String viewName = "";
         if (params.containsKey("areaFrom") || params.containsKey("areaTo") || params.containsKey("area") ||
                 params.containsKey("perimeterFrom") || params.containsKey("perimeterTo") || params.containsKey("perimeter")) {
-            viewName = "shape_with_area_and_perimeter";
+            return "shape_with_area_and_perimeter";
         } else {
-            viewName = "all_shapes";
+            return "all_shapes";
         }
-        return viewName;
     }
 }

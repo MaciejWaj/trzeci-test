@@ -3,9 +3,10 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
-<includeAll path="classpath*:/db"/>
-<!--                    "/db/create-tables.xml"-->
-<!--    <include file="/db/create-view-all-shapes.xml"/>-->
-<!--    <include file="/db/create-view-shape-with-area-and-perimeter.xml"/>-->
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+    <include file="/db/create-tables.xml"/>
+    <include file="/db/create-view-all-shapes.xml"/>
+    <include file="/db/create-view-all-user.xml"/>
+    <include file="/db/shape-with-area-and-perimeter.xml"/>
+
 </databaseChangeLog>

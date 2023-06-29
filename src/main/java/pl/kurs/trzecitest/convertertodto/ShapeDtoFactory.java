@@ -1,8 +1,8 @@
 package pl.kurs.trzecitest.convertertodto;
 
 import org.springframework.stereotype.Service;
-import pl.kurs.trzecitest.model.Shape;
 import pl.kurs.trzecitest.dto.ShapeDto;
+import pl.kurs.trzecitest.model.Shape;
 
 import java.util.List;
 import java.util.Locale;
@@ -23,7 +23,7 @@ public class ShapeDtoFactory {
                         .equals(converter.getConverterType().toLowerCase(Locale.ROOT)))
                 .findFirst()
                 .map(ShapeToShapeDtoConverter::getDtoType)
-                .orElseThrow(() -> new RuntimeException("No matching converter found for figure type: " + shape.getClass()));
+                .orElseThrow(() -> new RuntimeException("No matching converter found for shape type: " + shape.getClass()));
     }
 
 }

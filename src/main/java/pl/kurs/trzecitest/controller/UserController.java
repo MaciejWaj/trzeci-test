@@ -5,7 +5,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.kurs.trzecitest.dto.UserDto;
-import pl.kurs.trzecitest.exception.UserNotFoundException;
 import pl.kurs.trzecitest.security.AppUser;
 import pl.kurs.trzecitest.service.AppUserService;
 import pl.kurs.trzecitest.service.ShapeService;
@@ -27,7 +26,7 @@ public class UserController {
     private final ShapeService shapeService;
 
     @GetMapping("/{username}")
-    public ResponseEntity<UserDto> findUserByUsername(@PathVariable String username) throws UserNotFoundException {
+    public ResponseEntity<UserDto> findUserByUsername(@PathVariable String username) {
         AppUser userById = appUserService.findByUsername(username);
         return ResponseEntity.ok().body(mapToUserDto(userById));
     }

@@ -2,6 +2,7 @@ package pl.kurs.trzecitest.factory.creators;
 
 import org.springframework.stereotype.Service;
 import pl.kurs.trzecitest.command.CreateShapeCommand;
+import pl.kurs.trzecitest.command.UpgradeShapeCommand;
 import pl.kurs.trzecitest.model.Shape;
 
 import java.util.Map;
@@ -20,6 +21,10 @@ public class ShapeFactory {
 
     public Shape create(CreateShapeCommand command) {
         return creators.get(command.getType()).create(command.getParameters());
+    }
+
+    public Shape update(Shape shape, UpgradeShapeCommand upgradeShapeCommand) {
+        return creators.get(shape.getClass().getSimpleName().toUpperCase()).update(shape, upgradeShapeCommand.getParameters());
     }
 
 }

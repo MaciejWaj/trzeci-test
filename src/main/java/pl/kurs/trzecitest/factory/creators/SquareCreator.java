@@ -16,10 +16,23 @@ public class SquareCreator implements ShapeCreator {
 
     @Override
     public Shape create(Map<String, String> parameters) {
-        Square createdSquare = new Square(
-                getDoubleParameter("width", parameters)
-        );
-        return createdSquare;
+        return new Square(getDoubleParameter("width", parameters));
+    }
+
+    @Override
+    public Shape update(Shape shape, Map<String, String> parameters) {
+
+        if (shape instanceof Square) {
+            for (Map.Entry<String, String> entry : parameters.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+
+                if (key.equals("width")) {
+                    ((Square) shape).setWidth(Double.parseDouble(value));
+                }
+            }
+        }
+        return shape;
     }
 
 }

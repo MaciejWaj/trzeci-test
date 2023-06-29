@@ -1,13 +1,12 @@
 package pl.kurs.trzecitest.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 
 @Getter
 @Setter
@@ -19,7 +18,6 @@ public class Rectangle extends Shape {
 
     private double height;
     private double length;
-
 
     @Override
     public double calculateArea() {

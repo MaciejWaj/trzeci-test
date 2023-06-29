@@ -1,6 +1,9 @@
 package pl.kurs.trzecitest.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.time.LocalDateTime;
@@ -11,16 +14,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public abstract class ShapeDto extends RepresentationModel<ShapeDto> {
 
-        private int id;
-        private String type;
-        private int version;
-        private String createdBy;
-        private LocalDateTime createAt;
-        private LocalDateTime lastModifiedAt;
-        private String lastModifiedBy;
+    private Integer id;
+    private String type;
+    private int version;
+    private String createdBy;
+    private LocalDateTime createAt;
+    private LocalDateTime lastModifiedAt;
+    private String lastModifiedBy;
 
-        protected double area;
-        protected double perimeter;
-
-
+    protected double area;
+    protected double perimeter;
 }

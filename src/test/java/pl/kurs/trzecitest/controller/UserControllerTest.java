@@ -1,78 +1,87 @@
 package pl.kurs.trzecitest.controller;
 
-import org.junit.jupiter.api.BeforeEach;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import pl.kurs.trzecitest.TrzeciTestApplication;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.web.servlet.MockMvc;
+import pl.kurs.trzecitest.dto.UserDto;
 import pl.kurs.trzecitest.exception.UserNotFoundException;
-import pl.kurs.trzecitest.security.AppUser;
-import pl.kurs.trzecitest.service.AppUserService;
+import pl.kurs.trzecitest.repository.AppUserRepository;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(classes = TrzeciTestApplication.class)
+@SpringBootTest
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
+@Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = {"classpath:data.sql"})
 class UserControllerTest {
 
-    @Mock
-    private AppUserService appUserService;
+    @Autowired
+    private AppUserRepository appUserRepository;
 
-    @InjectMocks
-    private UserController userController;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    @Autowired
+    private MockMvc mvc;
+
+    @Test
+    public void findUserByUsernameShouldReturnUserDto() throws Exception {
+        //when
+        String contentAsString = mvc.perform(get("/api/v1/users/Maciej")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        //then
+        UserDto foundUser = objectMapper.readValue(contentAsString, UserDto.class);
+
+        assertEquals("Maciej",foundUser.getUsername() );
     }
 
     @Test
-    public void findUserByUsernameShouldReturnUserDto() throws UserNotFoundException {
-        String username = "testUser";
-
-        AppUser user = new AppUser();
-        user.setUsername(username);
-        when(appUserService.findByUsername(username)).thenReturn(user);
-
-        AppUser findUser = appUserService.findByUsername(username);
-
-        assertEquals(findUser.getUsername(), username);
+    public void findUserByUsernameShouldThrowUserNotFound() throws Exception {
+        //when
+        try {
+            String contentAsString = mvc.perform(get("/api/v1/users/UnknownUser")
+                    .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString();
+        } catch (UserNotFoundException e) {
+            assertEquals("User with name UnknownUser not found.", e.getMessage());
+        }
     }
 
     @Test
-    public void findUserByUsernameShouldThrowUserNotFound() throws UserNotFoundException {
-        String username = "testUser";
-        String usernameToSearch = "Test";
+    @WithMockUser(username = "TomaszAdmin", roles = "ADMIN")
+    public void shouldFindUserByParametersIfHasRoleAdmin() throws Exception {
+        //when
+        String contentAsString = mvc.perform(get("/api/v1/users?username=Maciej")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-        AppUser user = new AppUser();
-        user.setUsername(username);
-        when(appUserService.findByUsername(usernameToSearch)).thenReturn(user);
+        //then
+        List<UserDto> foundUser = objectMapper.readValue(contentAsString, new TypeReference<>() {
+        });
 
-        when(appUserService.findByUsername(usernameToSearch)).thenThrow(UserNotFoundException.class);
-
+        assertEquals("Maciej",foundUser.get(0).getUsername());
     }
-
-    @Test
-    public void getUserByParameters_WithEmptyFilterParam_ShouldReturnAllUsers() {
-        Map<String, String> param = new HashMap<>();
-        List<AppUser> appUsers = new ArrayList<>();
-
-        when(appUserService.findBySpecification(param)).thenReturn(appUsers);
-        List<AppUser> result = appUserService.findBySpecification(param);
-
-        assertNotNull(result);
-        assertEquals(appUsers, result);
-    }
-
-
 }

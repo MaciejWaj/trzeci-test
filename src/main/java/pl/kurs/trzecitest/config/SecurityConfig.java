@@ -1,44 +1,54 @@
 package pl.kurs.trzecitest.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
-
+import org.springframework.security.web.SecurityFilterChain;
+import pl.kurs.trzecitest.service.AppUserService;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig {
 
     @Autowired
-    private UserDetailsService appUserService;
+    private AppUserService appUserService;
 
     @Autowired
-    private EncoderConfig passwordEncoder;
+    private EncoderConfig encoder;
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(appUserService).passwordEncoder(passwordEncoder.passwordEncoder());
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authorizeRequests()
-                .antMatchers("/api/v1/shapes").hasAnyRole("CREATOR")
-//                .antMatchers("/api/v1/users/tutajMetoda").hasAnyRole("ADMIN")     dodać nazwe metody
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity.csrf().disable()
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests()
+                .requestMatchers(HttpMethod.POST, "/api/v1/shapes").hasRole("CREATOR")
+                .requestMatchers(HttpMethod.GET, "/api/v1/users").hasAnyRole("ADMIN")
                 .anyRequest().permitAll()
                 .and()
-                .httpBasic()
-                .and()
-                .csrf().disable();
+                .httpBasic();
+
+        return httpSecurity.build();
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(appUserService);
+        authenticationProvider.setPasswordEncoder(encoder.passwordEncoder());
+        return authenticationProvider;
     }
 
 }

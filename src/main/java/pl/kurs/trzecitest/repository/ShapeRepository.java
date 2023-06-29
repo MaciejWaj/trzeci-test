@@ -5,10 +5,14 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import pl.kurs.trzecitest.model.Shape;
 
 import java.util.List;
+import java.util.Optional;
 
-public interface ShapeRepository  extends JpaRepository<Shape, Integer>, JpaSpecificationExecutor<Shape> {
+public interface ShapeRepository extends JpaRepository<Shape, Integer>, JpaSpecificationExecutor<Shape> {
 
-    int countByCreatedBy(String username);
+    int countByCreatedById(int userId);
 
-    List<Shape> findByCreatedBy(String user);
+    List<Shape> findByCreatedById(int user);
+
+    Optional<Shape> findByIdAndCreatedById(int id, int userId);
+
 }

@@ -1,5 +1,7 @@
 package pl.kurs.trzecitest.model;
 
+import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -7,8 +9,6 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.annotation.*;
 import pl.kurs.trzecitest.security.AppUser;
 
-import javax.persistence.Id;
-import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,29 +20,24 @@ public abstract class Shape {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
     @Version
     private int version;
     @CreatedBy
-    private String createdBy;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
+    @JoinColumn(name = "created_by_id")
+    private AppUser createdBy;
     @CreatedDate
     private LocalDateTime createAt;
     @LastModifiedDate
     private LocalDateTime lastModifiedAt;
     @LastModifiedBy
-    private String lastModifiedBy;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
+    @JoinColumn(name = "modified_by_id")
+    private AppUser lastModifiedBy;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "author_id")
-    private AppUser author;
-
-    public Shape(AppUser author) {
-        this.author = author;
-    }
-
-    public void setAppUser(AppUser appUser) {
-        this.author = appUser;
-        appUser.getShape().add(this);
+    public Shape(AppUser user) {
+        this.createdBy = user;
     }
 
     public abstract double calculateArea();

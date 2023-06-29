@@ -10,6 +10,8 @@ public interface ShapeCreator {
 
     Shape create(Map<String, String> parameters);
 
+    Shape update(Shape shape, Map<String, String> parameters);
+
     default Double getDoubleParameter(String name, Map<String, String> parameters) {
         return Double.parseDouble(parameters.get(name));
     }

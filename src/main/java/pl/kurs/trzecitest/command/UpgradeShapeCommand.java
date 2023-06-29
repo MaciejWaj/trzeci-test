@@ -11,6 +11,6 @@ import java.util.Map;
 @ToString
 public class UpgradeShapeCommand {
 
-    private int id;
+    private Integer id;
     private Map<String, String> parameters;
 }

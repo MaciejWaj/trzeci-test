@@ -4,7 +4,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
 
-    <changeSet id="20230329_001_maciej" author="maciej">
+    <changeSet id="20230618_001_maciej" author="maciej">
 
         <createTable tableName="app_role">
             <column name="id" type="INT" autoIncrement="true">
@@ -19,27 +19,76 @@
             <column name="id" type="INT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="username" type="varchar(255)">
+            <column name="username" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="password" type="varchar(255)">
+            <column name="hashed_password" type="VARCHAR(255)">
                 <constraints nullable="false"/>
+            </column>
+            <column name="created_account_at" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_login" type="TIMESTAMP">
+                <constraints nullable="true"/>
             </column>
         </createTable>
 
         <createTable tableName="user_roles">
-            <column name="user_id" type="int">
+            <column name="user_id" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="role_id" type="int">
+            <column name="role_id" type="INT">
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <addForeignKeyConstraint baseTableName="user_roles" baseColumnNames="user_id"
-                                 referencedTableName="app_user" referencedColumnNames="id"
-                                 constraintName="FK_USER_ROLES"/>
-        <addForeignKeyConstraint baseTableName="user_roles" baseColumnNames="role_id" constraintName="FK_ROLES_USER"
-                                 referencedTableName="app_role" referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="user_roles"
+                                 baseColumnNames="user_id"
+                                 constraintName="FK_user_roles_app_user"
+                                 referencedTableName="app_user"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+        <addForeignKeyConstraint baseTableName="user_roles"
+                                 baseColumnNames="role_id"
+                                 constraintName="FK_user_roles_app_role"
+                                 referencedTableName="app_role"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+
+        <insert tableName="app_role">
+            <column name="id" valueNumeric="1" />
+            <column name="name" value="ROLE_ADMIN" />
+        </insert>
+        <insert tableName="app_role">
+            <column name="id" valueNumeric="2" />
+            <column name="name" value="ROLE_CREATOR" />
+        </insert>
+
+        <insert tableName="app_user">
+            <column name="id" valueNumeric="1" />
+            <column name="username" value="TomaszAdmin" />
+            <column name="hashed_password" value="hashed_password" />
+            <column name="created_account_at" type="TIMESTAMP" />
+            <column name="last_login" type="TIMESTAMP" />
+        </insert>
+
+        <insert tableName="app_user">
+            <column name="id" valueNumeric="2" />
+            <column name="username" value="Maciej" />
+            <column name="hashed_password" value="your_hashed_password" />
+            <column name="created_account_at" type="TIMESTAMP" />
+            <column name="last_login" type="TIMESTAMP" />
+        </insert>
+
+        <insert tableName="app_user">
+            <column name="id" valueNumeric="3" />
+            <column name="username" value="Test" />
+            <column name="hashed_password" value="your_hashed_password" />
+            <column name="created_account_at" type="TIMESTAMP" />
+            <column name="last_login" type="TIMESTAMP" />
+        </insert>
 
         <createTable tableName="shape">
             <column name="id" type="INT" autoIncrement="true">
@@ -51,8 +100,8 @@
             <column name="version" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_by" type="VARCHAR(255)">
-                <constraints nullable="true"/>
+            <column name="created_by_id" type="INT">
+                <constraints nullable="false"/>
             </column>
             <column name="create_at" type="TIMESTAMP">
                 <constraints nullable="true"/>
@@ -60,8 +109,8 @@
             <column name="last_modified_at" type="TIMESTAMP">
                 <constraints nullable="true"/>
             </column>
-            <column name="last_modified_by" type="VARCHAR(255)">
-                <constraints nullable="true"/>
+            <column name="modified_by_id" type="INT">
+                <constraints nullable="false"/>
             </column>
             <column name="radius" type="DOUBLE">
                 <constraints nullable="true"/>
@@ -76,28 +125,21 @@
                 <constraints nullable="true"/>
             </column>
         </createTable>
+
+        <addForeignKeyConstraint baseTableName="shape"
+                                 baseColumnNames="created_by_id"
+                                 referencedTableName="app_user"
+                                 referencedColumnNames="id"
+                                 constraintName="FK_Shape_AppUser_created"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+        <addForeignKeyConstraint baseTableName="shape"
+                                 baseColumnNames="modified_by_id"
+                                 referencedTableName="app_user"
+                                 referencedColumnNames="id"
+                                 constraintName="FK_Shape_AppUser_modified"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet id="20230522_002_maciej" author="Maciej">
-        <addColumn tableName="app_user">
-            <column> name="created_account_at" type="TIMESTAMP">
-            <constraints nullable="true"/>
-            </column>
-            <column> name="last_login" type"TIMESTAMP">
-                <constraints nullable="true"/>
-            </column>
-            <column name="shape_id" type="INT">
-                <constraints nullable="true"/>
-            </column>
-        </addColumn>
-        
-        <addColumn tableName="shape">
-            <column name="author_id" type="INT">
-                <constraints nullable="true"/>
-            </column>
-        </addColumn>
-        <addForeignKeyConstraint baseTableName="shape" baseColumnNames="author_id"
-                                 referencedTableName="app_user" referencedColumnNames="shape_id"
-                                 constraintName="FK_SHAPE_APP_USER"/>
-    </changeSet>
 </databaseChangeLog>

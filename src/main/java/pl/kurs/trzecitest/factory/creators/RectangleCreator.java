@@ -16,11 +16,25 @@ public class RectangleCreator implements ShapeCreator {
 
     @Override
     public Shape create(Map<String, String> parameters) {
-        Rectangle createdRectangle = new Rectangle(
-                getDoubleParameter("height", parameters),
-                getDoubleParameter("length", parameters)
-        );
-        return createdRectangle;
+        return new Rectangle(getDoubleParameter("height", parameters), getDoubleParameter("length", parameters));
     }
 
+    @Override
+    public Shape update(Shape shape, Map<String, String> parameters) {
+
+        if (shape instanceof Rectangle) {
+            for (Map.Entry<String, String> entry : parameters.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+
+                if (key.equals("height")) {
+                    ((Rectangle) shape).setHeight(Double.parseDouble(value));
+                }
+                if (key.equals("length")) {
+                    ((Rectangle) shape).setLength(Double.parseDouble(value));
+                }
+            }
+        }
+        return shape;
+    }
 }
