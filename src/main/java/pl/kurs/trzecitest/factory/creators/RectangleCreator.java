@@ -2,12 +2,11 @@ package pl.kurs.trzecitest.factory.creators;
 
 import org.springframework.stereotype.Service;
 import pl.kurs.trzecitest.model.Rectangle;
-import pl.kurs.trzecitest.model.Shape;
 
 import java.util.Map;
 
 @Service
-public class RectangleCreator implements ShapeCreator {
+public class RectangleCreator implements ShapeCreator<Rectangle> {
 
     @Override
     public String getType() {
@@ -15,26 +14,24 @@ public class RectangleCreator implements ShapeCreator {
     }
 
     @Override
-    public Shape create(Map<String, String> parameters) {
+    public Rectangle create(Map<String, String> parameters) {
         return new Rectangle(getDoubleParameter("height", parameters), getDoubleParameter("length", parameters));
     }
 
     @Override
-    public Shape update(Shape shape, Map<String, String> parameters) {
+    public Rectangle update(Rectangle rectangle, Map<String, String> parameters, int version) {
+        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
 
-        if (shape instanceof Rectangle) {
-            for (Map.Entry<String, String> entry : parameters.entrySet()) {
-                String key = entry.getKey();
-                String value = entry.getValue();
-
-                if (key.equals("height")) {
-                    ((Rectangle) shape).setHeight(Double.parseDouble(value));
-                }
-                if (key.equals("length")) {
-                    ((Rectangle) shape).setLength(Double.parseDouble(value));
-                }
+            if (key.equals("height")) {
+                rectangle.setHeight(Double.parseDouble(value));
+            }
+            if (key.equals("length")) {
+                rectangle.setLength(Double.parseDouble(value));
             }
         }
-        return shape;
+        rectangle.setVersion(version);
+        return rectangle;
     }
 }

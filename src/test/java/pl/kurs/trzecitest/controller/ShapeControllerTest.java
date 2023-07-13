@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
@@ -18,12 +17,17 @@ import pl.kurs.trzecitest.command.UpgradeShapeCommand;
 import pl.kurs.trzecitest.dto.CircleDto;
 import pl.kurs.trzecitest.dto.SquareDto;
 import pl.kurs.trzecitest.model.Circle;
+import pl.kurs.trzecitest.repository.AppUserRepository;
 import pl.kurs.trzecitest.repository.ShapeRepository;
+import pl.kurs.trzecitest.security.AppRole;
+import pl.kurs.trzecitest.security.AppUser;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,6 +44,9 @@ class ShapeControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired
+    private AppUserRepository appUserRepository;
+
+    @Autowired
     private MockMvc mvc;
 
     @AfterEach
@@ -48,8 +55,8 @@ class ShapeControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "Maciej", roles = "CREATOR")
-    public void shouldCreateShapeSquare() throws Exception {
+    void shouldCreateShapeSquare() throws Exception {
+        AppUser appUser = mockUserCreator();
         //given
         CreateShapeCommand command = new CreateShapeCommand();
         command.setType("SQUARE");
@@ -57,6 +64,7 @@ class ShapeControllerTest {
 
         //when
         String contentAsString = mvc.perform(post("/api/v1/shapes")
+                .with(user(appUser))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(command)))
                 .andExpect(status().isCreated())
@@ -72,8 +80,8 @@ class ShapeControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "Maciej", roles = "User")
-    public void shouldThrowUnauthorizedWhenCreateShapeWithoutRoleCreator() throws Exception {
+    void shouldThrowUnauthorizedWhenCreateShapeWithoutRoleCreator() throws Exception {
+        AppUser appUser = mockUserAdmin();
         //given
         CreateShapeCommand command = new CreateShapeCommand();
         command.setType("SQUARE");
@@ -81,6 +89,7 @@ class ShapeControllerTest {
 
         //when
         String contentAsString = mvc.perform(post("/api/v1/shapes")
+                .with(user(appUser))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(command)))
                 .andExpect(status().isForbidden())
@@ -90,14 +99,16 @@ class ShapeControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "Maciej", roles = "CREATOR")
-    public void shouldFindBySpecification() throws Exception {
+    void shouldFindBySpecification() throws Exception {
+        AppUser appUser = mockUserCreator();
+        appUser.setUsername("Maciej");
         //given
         Circle circle = new Circle(10);
+        circle.setCreatedBy(appUser);
         shapeRepository.save(circle);
 
         //when
-        String contentAsString = mvc.perform(get("/api/v1/shapes?radius=10&createdBy=Maciej")
+        String contentAsString = mvc.perform(get("/api/v1/shapes?radius=10")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn()
@@ -110,25 +121,25 @@ class ShapeControllerTest {
 
         assertEquals(1, circleDto.size());
         assertEquals(10, circleDto.get(0).getRadius());
-
     }
 
     @Test
-    @WithMockUser(username = "Maciej", roles = "CREATOR")
-    public void commandCantBeEmpty() throws Exception {
+    void commandCantBeEmpty() throws Exception {
+        AppUser appUser = mockUserCreator();
         //given
         CreateShapeCommand command = new CreateShapeCommand();
 
         //when
         ResultActions resultActions = mvc.perform(post("/api/v1/shapes")
+                .with(user(appUser))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(command)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    @WithMockUser(username = "Maciej", roles = "CREATOR")
-    public void addingDuplicateShapeShouldThrowException() throws Exception {
+    void addingDuplicateShapeShouldThrowException() throws Exception {
+        AppUser appUser = mockUserCreator();
         //given
         Circle circle = new Circle(1);
         CreateShapeCommand command = new CreateShapeCommand();
@@ -140,6 +151,7 @@ class ShapeControllerTest {
 
         //then
         ResultActions resultActions = mvc.perform(post("/api/v1/shapes")
+                .with(user(appUser))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(command)))
                 .andExpect(status().isBadRequest());
@@ -148,22 +160,26 @@ class ShapeControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "Maciej", roles = "CREATOR")
-    public void shouldDeleteShapeById() throws Exception {
+    void shouldDeleteShapeById() throws Exception {
+        AppUser appUser = mockUserCreator();
+        appUser.setUsername("Maciej");
         //given
         Circle circle = new Circle(10);
+        circle.setCreatedBy(appUser);
         shapeRepository.save(circle);
 
         //when
-        ResultActions resultActions = mvc.perform(delete("/api/v1/shapes/{id}", circle.getId()))
+        ResultActions resultActions = mvc.perform(delete("/api/v1/shapes/{id}", circle.getId())
+                .with(user(appUser.getUsername()).roles("CREATOR")))
                 .andExpect(status().isNoContent());
 
         assertEquals(0, shapeRepository.findAll().size());
     }
 
     @Test
-    @WithMockUser(username = "Maciej", roles = "CREATOR")
-    public void shouldEditCircleRadiusFrom1To10() throws Exception {
+    void shouldEditCircleRadiusFrom1To10() throws Exception {
+        AppUser appUser = mockUserCreator();
+        appUser.setUsername("Maciej");
         //given
         Circle circle = new Circle(1);
         shapeRepository.save(circle);
@@ -174,6 +190,7 @@ class ShapeControllerTest {
 
         //when
         String contentAsString = mvc.perform(put("/api/v1/shapes")
+                .with(user(appUser))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(upgradeCommand)))
                 .andExpect(status().isOk())
@@ -184,5 +201,23 @@ class ShapeControllerTest {
         //then
         CircleDto circleDto = objectMapper.readValue(contentAsString, CircleDto.class);
         assertEquals(10.0, circleDto.getRadius());
+    }
+
+    private AppUser mockUserCreator() {
+        AppRole appRole = new AppRole();
+        appRole.setName("ROLE_CREATOR");
+        AppUser appUser = new AppUser();
+        appUser.setRoles(Set.of(appRole));
+        appUser = appUserRepository.save(appUser);
+        return appUser;
+    }
+
+    private AppUser mockUserAdmin() {
+        AppRole appRole = new AppRole();
+        appRole.setName("ROLE_ADMIN");
+        AppUser appUser = new AppUser();
+        appUser.setRoles(Set.of(appRole));
+        appUser = appUserRepository.save(appUser);
+        return appUser;
     }
 }

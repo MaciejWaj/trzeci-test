@@ -18,20 +18,21 @@ public class RectangleToRectangleDtoConverter implements Converter<Rectangle, Re
     @Override
     public RectangleDto convert(MappingContext<Rectangle, RectangleDto> mappingContext) {
         Rectangle source = mappingContext.getSource();
-        RectangleDto dto = new RectangleDto(
-                source.getId(),
-                source.getClass().getSimpleName(),
-                source.getVersion(),
-                source.getHeight(),
-                source.getLength(),
-                source.getCreatedBy().getUsername(),
-                source.getCreateAt(),
-                source.getLastModifiedAt(),
-                source.getLastModifiedBy().getUsername(),
-                source.calculateArea(),
-                source.calculatePerimeter());
+        RectangleDto dto = RectangleDto.builder()
+                .id(source.getId())
+                .type(source.getClass().getSimpleName())
+                .version(source.getVersion())
+                .height(source.getHeight())
+                .length(source.getLength())
+                .createdBy(source.getCreatedBy().getUsername())
+                .createAt(source.getCreateAt())
+                .lastModifiedAt(source.getLastModifiedAt())
+                .lastModifiedBy(source.getLastModifiedBy().getUsername())
+                .area(source.calculateArea())
+                .perimeter(source.calculatePerimeter())
+                .build();
 
-        dto.add(linkTo((methodOn(UserController.class).findUserByUsername(source.getCreatedBy().getUsername()))).withRel("Author"));
+        dto.add(linkTo((methodOn(UserController.class).getByCreatedBy(source.getCreatedBy()))).withRel("Author"));
 
         return dto;
     }

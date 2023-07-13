@@ -24,7 +24,7 @@ public class ShapeFactory {
     }
 
     public Shape update(Shape shape, UpgradeShapeCommand upgradeShapeCommand) {
-        return creators.get(shape.getClass().getSimpleName().toUpperCase()).update(shape, upgradeShapeCommand.getParameters());
+        return creators.get(shape.getClass().getSimpleName().toUpperCase()).update(shape, upgradeShapeCommand.getParameters(), upgradeShapeCommand.getVersion());
     }
 
 }

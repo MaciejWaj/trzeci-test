@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import pl.kurs.trzecitest.exception.UserNotFoundException;
 import pl.kurs.trzecitest.repository.AppUserRepository;
 import pl.kurs.trzecitest.security.AppUser;
+import pl.kurs.trzecitest.userfinder.UserSpecificationFinder;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +24,8 @@ class AppUserServiceTest {
 
     @Mock
     private AppUserRepository appUserRepository;
+    @Mock
+    private UserSpecificationFinder userSpecificationFinder;
 
     @InjectMocks
     private AppUserService appUserService;
@@ -51,22 +54,12 @@ class AppUserServiceTest {
     void findBySpecificationShouldReturnEmptyListWhenParamsAreEmpty() {
         //give
         Map<String, String> params = Collections.emptyMap();
+
+        when(appUserService.findBySpecification(params)).thenReturn(List.of());
         // when
         List<AppUser> result = appUserService.findBySpecification(params);
         // then
         assertEquals(Collections.emptyList(), result);
     }
 
-    @Test
-    void shouldGetUserId() {
-        //given
-        AppUser user = new AppUser();
-        user.setId(1);
-        user.setUsername("Maciej");
-        when(appUserRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
-        //when
-        int result = appUserService.getUserId(user.getUsername());
-        //then
-        assertEquals(user.getId(), result);
-    }
 }

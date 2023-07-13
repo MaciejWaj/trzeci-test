@@ -4,13 +4,13 @@ import pl.kurs.trzecitest.model.Shape;
 
 import java.util.Map;
 
-public interface ShapeCreator {
+public interface ShapeCreator<T extends Shape> {
 
     String getType();
 
-    Shape create(Map<String, String> parameters);
+    T create(Map<String, String> parameters);
 
-    Shape update(Shape shape, Map<String, String> parameters);
+    T update(T shape, Map<String, String> parameters, int version);
 
     default Double getDoubleParameter(String name, Map<String, String> parameters) {
         return Double.parseDouble(parameters.get(name));

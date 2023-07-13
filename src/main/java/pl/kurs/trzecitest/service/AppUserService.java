@@ -2,13 +2,12 @@ package pl.kurs.trzecitest.service;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.kurs.trzecitest.exception.UserNotFoundException;
 import pl.kurs.trzecitest.repository.AppUserRepository;
 import pl.kurs.trzecitest.security.AppRole;
@@ -19,7 +18,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,26 +39,20 @@ public class AppUserService implements UserDetailsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) {
-        AppUser user = appUserRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("user with username + " + username + " doesn't exist"));
-        return new User(user.getUsername(), user.getPassword(), user.getRoles()
-                .stream()
-                .map(role -> new SimpleGrantedAuthority(role.getAuthority()))
-                .collect(Collectors.toSet()));
+        return appUserRepository.findByUsernameWithDetails(username).orElseThrow(() -> new UsernameNotFoundException("user with username + " + username + " not found."));
     }
 
+    @Transactional(readOnly = true)
     public AppUser findByUsername(String username) {
         return appUserRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User with name " + username + " not found."));
     }
 
+    @Transactional(readOnly = true)
     public List<AppUser> findBySpecification(Map<String, String> param) {
         return userSpecificationFinder.findUserByParameters(param);
     }
 
-    public int getUserId(String currentUserName) {
-        return appUserRepository.findByUsername(currentUserName)
-                .map(AppUser::getId)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-    }
 }

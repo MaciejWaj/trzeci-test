@@ -16,19 +16,20 @@ public class SquareToSquareDtoConverter implements Converter<Square, SquareDto>,
     @Override
     public SquareDto convert(MappingContext<Square, SquareDto> mappingContext) {
         Square source = mappingContext.getSource();
+        SquareDto dto = SquareDto.builder()
+                .id(source.getId())
+                .type(source.getClass().getSimpleName())
+                .version(source.getVersion())
+                .width(source.getWidth())
+                .createdBy(source.getCreatedBy().getUsername())
+                .createAt(source.getCreateAt())
+                .lastModifiedAt(source.getLastModifiedAt())
+                .lastModifiedBy(source.getLastModifiedBy().getUsername())
+                .area(source.calculateArea())
+                .perimeter(source.calculatePerimeter())
+                .build();
 
-        SquareDto dto = new SquareDto(
-                source.getId(),
-                source.getClass().getSimpleName(),
-                source.getVersion(),
-                source.getWidth(),
-                source.getCreatedBy().getUsername(),
-                source.getCreateAt(),
-                source.getLastModifiedAt(),
-                source.getLastModifiedBy().getUsername(),
-                source.calculateArea(),
-                source.calculatePerimeter());
-        dto.add(linkTo((methodOn(UserController.class).findUserByUsername(source.getCreatedBy().getUsername()))).withRel("Author"));
+        dto.add(linkTo((methodOn(UserController.class).getByCreatedBy(source.getCreatedBy()))).withRel("Author"));
 
         return dto;
     }

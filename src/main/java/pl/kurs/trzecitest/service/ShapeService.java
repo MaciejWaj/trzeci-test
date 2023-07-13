@@ -11,13 +11,14 @@ import pl.kurs.trzecitest.exception.ShapeNotFoundException;
 import pl.kurs.trzecitest.factory.creators.ShapeFactory;
 import pl.kurs.trzecitest.model.Shape;
 import pl.kurs.trzecitest.repository.ShapeRepository;
+import pl.kurs.trzecitest.security.AppUser;
 import pl.kurs.trzecitest.shapefinder.ShapeSpecificationFinder;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class ShapeService {
 
@@ -26,42 +27,42 @@ public class ShapeService {
     private final ShapeSpecificationFinder shapeSpecificationFinder;
     private final AppUserService appUserService;
 
+    @Transactional
     public Shape createShape(CreateShapeCommand command) {
         checkCommand(command);
         Shape shape = shapeFactory.create(command);
         return shapeRepository.save(shape);
     }
 
+    @Transactional
     public List<Shape> findBySpecification(Map<String, String> param) {
         return shapeSpecificationFinder.getShapeWithParams(param);
     }
 
-    public Shape findByIdAndUserName(int id, String currentUserName) {
-        int userId = appUserService.getUserId(currentUserName);
-        return shapeRepository.findByIdAndCreatedById(id, userId)
-                .orElseThrow(() -> new ShapeNotFoundException("Shape with id " + id + " and created by " + currentUserName + " not found"));
+    @Transactional(readOnly = true)
+    public Set<Shape> findByCreatedBy(String createdBy) {
+        AppUser byUsername = appUserService.findByUsername(createdBy);
+        return byUsername.getShape();
     }
 
-    public List<Shape> findByCreatedBy(String createdBy) {
-        int userId = appUserService.getUserId(createdBy);
-        return shapeRepository.findByCreatedById(userId);
-    }
-
-    public void deleteByIdAndUserName(int shapeId, String currentUserName) {
-        Shape shape = findByIdAndUserName(shapeId, currentUserName);
+    @Transactional
+    public void deleteByIdAndUsername(int shapeId, String currentUserName) {
+        Shape shape = findByShapeIdAndUsername(shapeId, currentUserName);
         shapeRepository.delete(shape);
     }
 
+    @Transactional
     public Shape editShape(UpgradeShapeCommand upgradeShapeCommand, String currentUsername) {
         checkUpgradeShapeCommand(upgradeShapeCommand);
-        Shape shape = findByIdAndUserName(upgradeShapeCommand.getId(), currentUsername);
+        Shape shape = findByShapeIdAndUsername(upgradeShapeCommand.getId(), currentUsername);
         shapeFactory.update(shape, upgradeShapeCommand);
         return shapeRepository.save(shape);
     }
 
-    public int countCreatedShape(String username) {
-        int userId = appUserService.getUserId(username);
-        return shapeRepository.countByCreatedById(userId);
+    @Transactional(readOnly = true)
+    public Shape findByShapeIdAndUsername(int id, String currentUsername) {
+        return shapeRepository.findByIdAndCreatedBy(id, currentUsername)
+                .orElseThrow(() -> new ShapeNotFoundException("Shape with id " + id + " and created by " + currentUsername + " not found"));
     }
 
     private void checkCommand(CreateShapeCommand command) {

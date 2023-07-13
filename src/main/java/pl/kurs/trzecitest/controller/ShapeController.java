@@ -12,6 +12,7 @@ import pl.kurs.trzecitest.command.UpgradeShapeCommand;
 import pl.kurs.trzecitest.convertertodto.ShapeDtoFactory;
 import pl.kurs.trzecitest.dto.ShapeDto;
 import pl.kurs.trzecitest.model.Shape;
+import pl.kurs.trzecitest.security.AppUser;
 import pl.kurs.trzecitest.service.ShapeService;
 
 import java.util.List;
@@ -41,7 +42,7 @@ public class ShapeController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteShapeById(@PathVariable int id, @AuthenticationPrincipal UserDetails currentUser) {
-        shapeService.deleteByIdAndUserName(id, currentUser.getUsername());
+        shapeService.deleteByIdAndUsername(id, currentUser.getUsername());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -53,6 +54,10 @@ public class ShapeController {
     @GetMapping("/{user}")
     public List<ShapeDto> getShapeCreatedBy(@PathVariable String user) {
         return shapeService.findByCreatedBy(user).stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    public List<ShapeDto> getListOfShapeCreatedBy(AppUser user) {
+        return user.getShape().stream().map(this::toDto).collect(Collectors.toList());
     }
 
     public ShapeDto toDto(Shape shape) {

@@ -1,12 +1,13 @@
 package pl.kurs.trzecitest.model;
 
-import jakarta.persistence.Id;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.Version;
-import org.springframework.data.annotation.*;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 import pl.kurs.trzecitest.security.AppUser;
 
 import java.time.LocalDateTime;
@@ -22,9 +23,9 @@ public abstract class Shape {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Version
-    private int version;
+    private Integer version;
     @CreatedBy
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_id")
     private AppUser createdBy;
     @CreatedDate
@@ -32,11 +33,11 @@ public abstract class Shape {
     @LastModifiedDate
     private LocalDateTime lastModifiedAt;
     @LastModifiedBy
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name = "modified_by_id")
     private AppUser lastModifiedBy;
 
-    public Shape(AppUser user) {
+    protected Shape(AppUser user) {
         this.createdBy = user;
     }
 

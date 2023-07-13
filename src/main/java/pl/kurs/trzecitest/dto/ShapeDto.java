@@ -16,7 +16,7 @@ public abstract class ShapeDto extends RepresentationModel<ShapeDto> {
 
     private Integer id;
     private String type;
-    private int version;
+    private Integer version;
     private String createdBy;
     private LocalDateTime createAt;
     private LocalDateTime lastModifiedAt;

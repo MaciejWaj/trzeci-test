@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import pl.kurs.trzecitest.dto.UserDto;
 import pl.kurs.trzecitest.security.AppUser;
 import pl.kurs.trzecitest.service.AppUserService;
-import pl.kurs.trzecitest.service.ShapeService;
 
 import java.util.List;
 import java.util.Map;
@@ -23,12 +22,11 @@ public class UserController {
 
     private final ModelMapper modelMapper;
     private final AppUserService appUserService;
-    private final ShapeService shapeService;
 
     @GetMapping("/{username}")
     public ResponseEntity<UserDto> findUserByUsername(@PathVariable String username) {
-        AppUser userById = appUserService.findByUsername(username);
-        return ResponseEntity.ok().body(mapToUserDto(userById));
+        AppUser userByUsername = appUserService.findByUsername(username);
+        return ResponseEntity.ok().body(mapToUserDto(userByUsername));
     }
 
     @GetMapping
@@ -36,11 +34,16 @@ public class UserController {
         return appUserService.findBySpecification(filterParam).stream().map(this::mapToUserDto).collect(Collectors.toList());
     }
 
+    public UserDto getByCreatedBy(AppUser user) {
+        return mapToUserDto(user);
+    }
+
     private UserDto mapToUserDto(AppUser user) {
         UserDto userDto = modelMapper.map(user, UserDto.class);
-        int amountOfCreatedShape = shapeService.countCreatedShape(user.getUsername());
+        int amountOfCreatedShape = user.getShape().size();
         userDto.setCreatedShape(amountOfCreatedShape);
-        userDto.add(linkTo((methodOn(ShapeController.class).getShapeCreatedBy(user.getUsername()))).withRel("List of created shape"));
+        userDto.add(linkTo((methodOn(ShapeController.class).getListOfShapeCreatedBy(user))
+        ).withRel("List of created shape"));
         return userDto;
     }
 }

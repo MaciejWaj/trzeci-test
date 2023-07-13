@@ -1,10 +1,7 @@
 package pl.kurs.trzecitest.security;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.springframework.data.annotation.CreatedDate;
@@ -14,13 +11,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import pl.kurs.trzecitest.model.Shape;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class AppUser extends RepresentationModel<AppUser> implements UserDetails {
 
     @Id
@@ -33,9 +33,10 @@ public class AppUser extends RepresentationModel<AppUser> implements UserDetails
     @CreatedDate
     private LocalDateTime createdAccountAt;
     private LocalDateTime lastLogin;
-    @OneToMany(mappedBy = "createdBy", cascade = CascadeType.REMOVE)
+
+    @OneToMany(mappedBy = "createdBy", cascade = CascadeType.DETACH)
     @Fetch(FetchMode.JOIN)
-    private List<Shape> shape = new ArrayList<>();
+    private Set<Shape> shape = new HashSet<>();
 
     @ManyToMany(cascade = CascadeType.ALL)
     @Fetch(FetchMode.JOIN)

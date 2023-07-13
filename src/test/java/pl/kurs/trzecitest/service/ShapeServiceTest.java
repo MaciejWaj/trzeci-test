@@ -48,7 +48,7 @@ class ShapeServiceTest {
     void shouldCreateShapeSquare() {
         //given
         CreateShapeCommand command = new CreateShapeCommand();
-        Shape square = new Square();
+        Square square = new Square();
         command.setType("SQUARE");
         command.setParameters(Collections.singletonMap("width", "10"));
         when(shapeFactory.create(command)).thenReturn(square);
@@ -80,10 +80,9 @@ class ShapeServiceTest {
     void shouldFindByIdAndUsername() {
         //given
         Rectangle rectangle = new Rectangle();
-        when(appUserService.getUserId(USER_NAME)).thenReturn(USER_ID);
-        when(shapeRepository.findByIdAndCreatedById(SHAPE_ID, USER_ID)).thenReturn(Optional.of(rectangle));
+        when(shapeRepository.findByIdAndCreatedBy(USER_ID, USER_NAME)).thenReturn(Optional.of(rectangle));
         //when
-        Shape result = shapeService.findByIdAndUserName(SHAPE_ID, USER_NAME);
+        Shape result = shapeService.findByShapeIdAndUsername(USER_ID, USER_NAME);
         //then
         assertEquals(rectangle, result);
     }
@@ -91,10 +90,9 @@ class ShapeServiceTest {
     @Test
     void shouldThrowShapeNotFoundExceptionWhenShapeNotFound() {
         //given
-        when(appUserService.getUserId(USER_NAME)).thenReturn(USER_ID);
-        when(shapeRepository.findByIdAndCreatedById(SHAPE_ID, USER_ID)).thenReturn(Optional.empty());
+        when(shapeRepository.findByIdAndCreatedBy(USER_ID, USER_NAME)).thenReturn(Optional.empty());
         //when then
-        assertThrows(ShapeNotFoundException.class, () ->  shapeService.findByIdAndUserName(SHAPE_ID, USER_NAME));
+        assertThrows(ShapeNotFoundException.class, () -> shapeService.findByShapeIdAndUsername(SHAPE_ID, USER_NAME));
     }
 
     @Test
@@ -104,8 +102,7 @@ class ShapeServiceTest {
         upCommand.setId(SHAPE_ID);
         upCommand.setParameters(Map.of("height", "10"));
         Rectangle rectangle = new Rectangle();
-        when(appUserService.getUserId(USER_NAME)).thenReturn(USER_ID);
-        when(shapeRepository.findByIdAndCreatedById(SHAPE_ID, USER_ID)).thenReturn(Optional.of(rectangle));
+        when(shapeRepository.findByIdAndCreatedBy(SHAPE_ID, USER_NAME)).thenReturn(Optional.of(rectangle));
         when(shapeFactory.update(rectangle, upCommand)).thenReturn(rectangle);
         when(shapeRepository.save(rectangle)).thenReturn(rectangle);
         //when
@@ -119,18 +116,6 @@ class ShapeServiceTest {
     void shouldThrowCommandInvalidValueExceptionOnUpdate(UpgradeShapeCommand command) {
         //when then
         assertThrows(CommandInvalidValueException.class, () -> shapeService.editShape(command, USER_NAME));
-    }
-
-    @Test
-    void shouldCountCreatedShape() {
-        //given
-        int shapeCount = 200;
-        when(appUserService.getUserId(USER_NAME)).thenReturn(USER_ID);
-        when(shapeRepository.countByCreatedById(USER_ID)).thenReturn(shapeCount);
-        //when
-        int result = shapeService.countCreatedShape(USER_NAME);
-        //then
-        assertEquals(shapeCount, result);
     }
 
     private static Stream<UpgradeShapeCommand> provideInvalidUpdateCommand() {

@@ -13,7 +13,6 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import pl.kurs.trzecitest.dto.UserDto;
 import pl.kurs.trzecitest.exception.UserNotFoundException;
-import pl.kurs.trzecitest.repository.AppUserRepository;
 
 import java.util.List;
 
@@ -28,16 +27,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerTest {
 
     @Autowired
-    private AppUserRepository appUserRepository;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
     private MockMvc mvc;
 
     @Test
-    public void findUserByUsernameShouldReturnUserDto() throws Exception {
+    void findUserByUsernameShouldReturnUserDto() throws Exception {
         //when
         String contentAsString = mvc.perform(get("/api/v1/users/Maciej")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -49,11 +45,11 @@ class UserControllerTest {
         //then
         UserDto foundUser = objectMapper.readValue(contentAsString, UserDto.class);
 
-        assertEquals("Maciej",foundUser.getUsername() );
+        assertEquals("Maciej", foundUser.getUsername());
     }
 
     @Test
-    public void findUserByUsernameShouldThrowUserNotFound() throws Exception {
+    void findUserByUsernameShouldThrowUserNotFound() throws Exception {
         //when
         try {
             String contentAsString = mvc.perform(get("/api/v1/users/UnknownUser")
@@ -69,7 +65,7 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(username = "TomaszAdmin", roles = "ADMIN")
-    public void shouldFindUserByParametersIfHasRoleAdmin() throws Exception {
+    void shouldFindUserByParametersIfHasRoleAdmin() throws Exception {
         //when
         String contentAsString = mvc.perform(get("/api/v1/users?username=Maciej")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -82,6 +78,6 @@ class UserControllerTest {
         List<UserDto> foundUser = objectMapper.readValue(contentAsString, new TypeReference<>() {
         });
 
-        assertEquals("Maciej",foundUser.get(0).getUsername());
+        assertEquals("Maciej", foundUser.get(0).getUsername());
     }
 }
