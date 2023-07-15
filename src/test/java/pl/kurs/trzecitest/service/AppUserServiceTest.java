@@ -57,7 +57,7 @@ class AppUserServiceTest {
 
         when(appUserService.findBySpecification(params)).thenReturn(List.of());
         // when
-        List<AppUser> result = appUserService.findBySpecification(params);
+        List<AppUser> result = userSpecificationFinder.findUserByParameters(params);
         // then
         assertEquals(Collections.emptyList(), result);
     }

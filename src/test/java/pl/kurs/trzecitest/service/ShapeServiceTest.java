@@ -16,6 +16,7 @@ import pl.kurs.trzecitest.model.Rectangle;
 import pl.kurs.trzecitest.model.Shape;
 import pl.kurs.trzecitest.model.Square;
 import pl.kurs.trzecitest.repository.ShapeRepository;
+import pl.kurs.trzecitest.shapefinder.ShapeSpecificationFinder;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,7 +40,7 @@ class ShapeServiceTest {
     @Mock
     private ShapeFactory shapeFactory;
     @Mock
-    private AppUserService appUserService;
+    private ShapeSpecificationFinder shapeSpecificationFinder;
 
     @InjectMocks
     private ShapeService shapeService;
@@ -71,9 +72,9 @@ class ShapeServiceTest {
         //give
         Map<String, String> params = Collections.emptyMap();
         // when
-        List<Shape> result = shapeService.findBySpecification(params);
+        List<Shape> shapeWithParams = shapeSpecificationFinder.getShapeWithParams(params);
         // then
-        assertEquals(Collections.emptyList(), result);
+        assertEquals(Collections.emptyList(), shapeWithParams);
     }
 
     @Test
