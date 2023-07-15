@@ -32,7 +32,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf().disable()
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests()
                 .requestMatchers(HttpMethod.POST, "/api/v1/shapes").hasRole("CREATOR")
                 .requestMatchers(HttpMethod.GET, "/api/v1/users").hasAnyRole("ADMIN")
