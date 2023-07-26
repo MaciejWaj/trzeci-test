@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet id="20230716_001_maciej" author="maciej">
+
+        <insert tableName="app_role">
+            <column name="id" valueNumeric="1"/>
+            <column name="name" value="ROLE_ADMIN"/>
+        </insert>
+        <insert tableName="app_role">
+            <column name="id" valueNumeric="2"/>
+            <column name="name" value="ROLE_CREATOR"/>
+        </insert>
+
+        <insert tableName="app_user">
+            <column name="id" valueNumeric="1"/>
+            <column name="username" value="TomaszAdmin"/>
+            <column name="password" value="hashed_password"/>
+            <column name="created_account_at" type="TIMESTAMP"/>
+            <column name="last_login" type="TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="app_user">
+            <column name="id" valueNumeric="2"/>
+            <column name="username" value="Maciej"/>
+            <column name="password" value="your_hashed_password"/>
+            <column name="created_account_at" type="TIMESTAMP"/>
+            <column name="last_login" type="TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="app_user">
+            <column name="id" valueNumeric="3"/>
+            <column name="username" value="Test"/>
+            <column name="password" value="your_hashed_password"/>
+            <column name="created_account_at" type="TIMESTAMP"/>
+            <column name="last_login" type="TIMESTAMP"/>
+        </insert>
+
+        <rollback>
+            <dropTable tableName="app_user"/>
+            <dropTable tableName="app_role"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>
