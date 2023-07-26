@@ -20,14 +20,8 @@ public class SquareCreator implements ShapeCreator<Square> {
 
     @Override
     public Square update(Square square, Map<String, String> parameters, int version) {
-        for (Map.Entry<String, String> entry : parameters.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-
-            if (key.equals("width")) {
-                square.setWidth(Double.parseDouble(value));
-            }
-        }
+        String updatedWidth = parameters.get("width");
+        square.setWidth(Double.parseDouble(updatedWidth));
         square.setVersion(version);
         return square;
     }

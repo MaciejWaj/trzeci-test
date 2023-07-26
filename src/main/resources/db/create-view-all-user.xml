@@ -8,15 +8,16 @@
         <createView viewName="all_user">
             SELECT
             app_user.id,
-            password,
-            username,
-            created_account_at,
-            last_login,
+            app_user.username,
+            app_user.password,
+            app_user.created_account_at,
+            app_user.last_login,
+            ur.role_id AS user_role,
             COUNT(s.id) AS createdShape
             FROM app_user
-            LEFT JOIN shape.shape s ON app_user.id = s.author_id
-            GROUP BY
-            id, username
+            LEFT JOIN shape s ON app_user.id = s.created_by_id
+            LEFT JOIN user_roles ur on app_user.id = ur.user_id
+            GROUP BY app_user.id, app_user.username, app_user.password, app_user.created_account_at, app_user.last_login, ur.role_id;
         </createView>
 
     </changeSet>

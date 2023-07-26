@@ -20,16 +20,13 @@ public class RectangleCreator implements ShapeCreator<Rectangle> {
 
     @Override
     public Rectangle update(Rectangle rectangle, Map<String, String> parameters, int version) {
-        for (Map.Entry<String, String> entry : parameters.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
+        String updatedHeight = parameters.get("height");
+        String updatedLength = parameters.get("length");
 
-            if (key.equals("height")) {
-                rectangle.setHeight(Double.parseDouble(value));
-            }
-            if (key.equals("length")) {
-                rectangle.setLength(Double.parseDouble(value));
-            }
+        if(Double.parseDouble(updatedHeight) != rectangle.getHeight()) {
+            rectangle.setHeight(Double.parseDouble(updatedHeight));
+        } else if (Double.parseDouble(updatedLength) != rectangle.getLength()) {
+            rectangle.setLength(Double.parseDouble(updatedLength));
         }
         rectangle.setVersion(version);
         return rectangle;

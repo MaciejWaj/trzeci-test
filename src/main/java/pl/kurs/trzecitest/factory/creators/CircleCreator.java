@@ -20,14 +20,8 @@ public class CircleCreator implements ShapeCreator<Circle> {
 
     @Override
     public Circle update(Circle circle, Map<String, String> parameters, int version) {
-        for (Map.Entry<String, String> entry : parameters.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-
-            if (key.equals("radius")) {
-                circle.setRadius(Double.parseDouble(value));
-            }
-        }
+        String updatedRadius = parameters.get("radius");
+        circle.setRadius(Double.parseDouble(updatedRadius));
         circle.setVersion(version);
         return circle;
     }

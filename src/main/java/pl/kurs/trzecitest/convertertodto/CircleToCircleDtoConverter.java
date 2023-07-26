@@ -6,6 +6,7 @@ import org.modelmapper.spi.MappingContext;
 import org.springframework.stereotype.Component;
 import pl.kurs.trzecitest.controller.UserController;
 import pl.kurs.trzecitest.dto.CircleDto;
+import pl.kurs.trzecitest.dto.ShapeDto;
 import pl.kurs.trzecitest.model.Circle;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -37,13 +38,12 @@ public class CircleToCircleDtoConverter implements Converter<Circle, CircleDto>,
     }
 
     @Override
-    public CircleDto getDtoType() {
-        return CircleDto.builder().build();
-    }
-
-    @Override
     public String getConverterType() {
         return "Circle";
     }
 
+    @Override
+    public Class<? extends ShapeDto> getDtoType() {
+        return CircleDto.class;
+    }
 }

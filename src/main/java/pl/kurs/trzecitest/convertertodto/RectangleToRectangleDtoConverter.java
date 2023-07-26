@@ -1,18 +1,17 @@
 package pl.kurs.trzecitest.convertertodto;
 
-import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
 import org.springframework.stereotype.Component;
 import pl.kurs.trzecitest.controller.UserController;
 import pl.kurs.trzecitest.dto.RectangleDto;
+import pl.kurs.trzecitest.dto.ShapeDto;
 import pl.kurs.trzecitest.model.Rectangle;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-@Slf4j
 public class RectangleToRectangleDtoConverter implements Converter<Rectangle, RectangleDto>, ShapeToShapeDtoConverter {
 
     @Override
@@ -38,13 +37,12 @@ public class RectangleToRectangleDtoConverter implements Converter<Rectangle, Re
     }
 
     @Override
-    public RectangleDto getDtoType() {
-        return RectangleDto.builder().build();
-    }
-
-    @Override
     public String getConverterType() {
         return "Rectangle";
     }
 
+    @Override
+    public Class<? extends ShapeDto> getDtoType() {
+        return RectangleDto.class;
+    }
 }

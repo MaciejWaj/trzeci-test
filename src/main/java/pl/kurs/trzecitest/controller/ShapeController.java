@@ -61,6 +61,6 @@ public class ShapeController {
     }
 
     public ShapeDto toDto(Shape shape) {
-        return modelMapper.map(shape, shapeDtoFactory.findConverterClass(shape).getClass());
+        return modelMapper.map(shape, shapeDtoFactory.findConverterClass(shape));
     }
 }

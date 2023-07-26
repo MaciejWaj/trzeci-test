@@ -8,5 +8,6 @@
     <include file="/db/create-view-all-shapes.xml"/>
     <include file="/db/create-view-all-user.xml"/>
     <include file="/db/shape-with-area-and-perimeter.xml"/>
+    <include file="/db/create-user-database.xml"/>
 
 </databaseChangeLog>

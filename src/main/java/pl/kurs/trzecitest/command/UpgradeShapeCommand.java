@@ -13,5 +13,5 @@ public class UpgradeShapeCommand {
 
     private Integer id;
     private Map<String, String> parameters;
-    private int version;
+    private Integer version;
 }

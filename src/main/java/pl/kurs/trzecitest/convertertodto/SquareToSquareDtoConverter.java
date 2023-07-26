@@ -4,6 +4,7 @@ import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
 import org.springframework.stereotype.Component;
 import pl.kurs.trzecitest.controller.UserController;
+import pl.kurs.trzecitest.dto.ShapeDto;
 import pl.kurs.trzecitest.dto.SquareDto;
 import pl.kurs.trzecitest.model.Square;
 
@@ -35,13 +36,12 @@ public class SquareToSquareDtoConverter implements Converter<Square, SquareDto>,
     }
 
     @Override
-    public SquareDto getDtoType() {
-        return SquareDto.builder().build();
-    }
-
-    @Override
     public String getConverterType() {
         return "Square";
     }
 
+    @Override
+    public Class<? extends ShapeDto> getDtoType() {
+        return SquareDto.class;
+    }
 }

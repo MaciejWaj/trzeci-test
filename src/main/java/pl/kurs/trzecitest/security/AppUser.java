@@ -26,7 +26,6 @@ public class AppUser extends RepresentationModel<AppUser> implements UserDetails
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
     @Column(unique = true)
     private String username;
     private String password;

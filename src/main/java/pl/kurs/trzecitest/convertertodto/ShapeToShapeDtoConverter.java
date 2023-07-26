@@ -4,8 +4,7 @@ import pl.kurs.trzecitest.dto.ShapeDto;
 
 public interface ShapeToShapeDtoConverter {
 
-    ShapeDto getDtoType();
-
     String getConverterType();
 
+    Class<? extends ShapeDto> getDtoType();
 }

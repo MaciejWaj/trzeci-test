@@ -17,13 +17,13 @@ public class ShapeDtoFactory {
     }
 
 
-    public ShapeDto findConverterClass(Shape shape) {
+    public Class<? extends ShapeDto> findConverterClass(Shape shape) {
         return converters.stream()
                 .filter(converter -> shape.getClass().getSimpleName().toLowerCase(Locale.ROOT)
                         .equals(converter.getConverterType().toLowerCase(Locale.ROOT)))
                 .findFirst()
                 .map(ShapeToShapeDtoConverter::getDtoType)
-                .orElseThrow(() -> new RuntimeException("No matching converter found for shape type: " + shape.getClass()));
+                .orElseThrow(() ->  new RuntimeException("No matching converter found for shape type: " + shape.getClass()));
     }
 
 }
