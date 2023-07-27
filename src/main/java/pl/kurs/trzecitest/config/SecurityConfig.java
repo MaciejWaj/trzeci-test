@@ -3,7 +3,6 @@ package pl.kurs.trzecitest.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -35,8 +34,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers(HttpMethod.POST, "/api/v1/shapes").hasRole("CREATOR")
-                .requestMatchers(HttpMethod.GET, "/api/v1/users").hasAnyRole("ADMIN")
+//                .requestMatchers(HttpMethod.POST, "/api/v1/shapes").hasRole("CREATOR")
+//                .requestMatchers(HttpMethod.GET, "/api/v1/users").hasAnyRole("ADMIN")
                 .anyRequest().permitAll()
                 .and()
                 .sessionManagement(sesion -> sesion.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
