@@ -35,7 +35,7 @@ class AppUserServiceTest {
         //given
         AppUser user = new AppUser();
         user.setUsername("Maciej");
-        when(appUserRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
+        when(appUserRepository.findByUsernameWithDetails(user.getUsername())).thenReturn(Optional.of(user));
         //when
         AppUser result = appUserService.findByUsername(user.getUsername());
         //then

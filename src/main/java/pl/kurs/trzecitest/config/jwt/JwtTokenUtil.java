@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -54,9 +55,10 @@ public class JwtTokenUtil implements Serializable {
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-    public String generateToken(String username) {
+    public String generateToken(Authentication authenticated) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username);
+        claims.put("role", authenticated.getAuthorities());
+        return createToken(claims, authenticated.getName());
     }
 
     private String createToken(Map<String, Object> claims, String username) {

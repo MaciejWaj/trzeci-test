@@ -12,6 +12,4 @@ public interface AppUserRepository extends JpaRepository<AppUser, Integer> {
     @Query("SELECT au from AppUser au LEFT JOIN FETCH au.shape shape LEFT JOIN FETCH au.roles roles WHERE au.username = :username")
     Optional<AppUser> findByUsernameWithDetails(String username);
 
-    Optional<AppUser> findByUsername(String username);
-
 }

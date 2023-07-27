@@ -24,7 +24,7 @@ public class JwtAuthenticationController {
     public String createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws UserNotFoundException {
         Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword()));
         if (authenticate.isAuthenticated()) {
-            return jwtTokenUtil.generateToken(authenticationRequest.getUsername());
+            return jwtTokenUtil.generateToken(authenticate);
         } else {
             throw new UserNotFoundException("Invalid user request!");
         }

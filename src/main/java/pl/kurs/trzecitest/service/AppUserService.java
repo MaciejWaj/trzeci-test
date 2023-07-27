@@ -18,9 +18,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-public class AppUserService
-//        implements UserDetailsService
-{
+public class AppUserService {
 
     private final AppUserRepository appUserRepository;
     private final UserSpecificationFinder userSpecificationFinder;
@@ -37,15 +35,9 @@ public class AppUserService
         appUserRepository.saveAll(List.of(admin, creator, creator2));
     }
 
-//    @Override
-//    @Transactional(readOnly = true)
-//    public UserDetails loadUserByUsername(String username) {
-//        return appUserRepository.findByUsernameWithDetails(username).orElseThrow(() -> new UsernameNotFoundException("user with username + " + username + " not found."));
-//    }
-
     @Transactional(readOnly = true)
     public AppUser findByUsername(String username) {
-        return appUserRepository.findByUsername(username)
+        return appUserRepository.findByUsernameWithDetails(username)
                 .orElseThrow(() -> new UserNotFoundException("User with name " + username + " not found."));
     }
 
