@@ -34,7 +34,7 @@ public class ShapeService {
         return shapeRepository.save(shape);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Shape> findBySpecification(Map<String, String> param) {
         return shapeSpecificationFinder.getShapeWithParams(param);
     }

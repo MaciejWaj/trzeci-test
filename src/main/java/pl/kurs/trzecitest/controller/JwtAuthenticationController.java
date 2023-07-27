@@ -1,6 +1,6 @@
 package pl.kurs.trzecitest.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,13 +12,11 @@ import pl.kurs.trzecitest.exception.UserNotFoundException;
 @RestController
 @CrossOrigin
 @RequestMapping("/api/v1/")
+@AllArgsConstructor
 public class JwtAuthenticationController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
-
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenUtil jwtTokenUtil;
 
     @PostMapping("/login")
     public String createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws UserNotFoundException {
